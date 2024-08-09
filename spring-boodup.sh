@@ -16,7 +16,7 @@ cat << "EOF"
 
 The MIT License (MIT)
 
-Copyright (c) 2024 youngMok <indiemaru@gmail.com>
+Copyright (c) 2024 YoungMok Kim <indiemaru@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -77,59 +77,21 @@ mkdir -p $path/adapters
 mkdir -p $path/adapters/web
 mkdir -p $path$persistPath
 
-function showContent() {
-    if $showCnt; then
-        
-        echo -e "${GREEN}\n"
-        cat $1
-        echo -e "${NC}"
-    fi    
+function createEntity(){
+    tmpl=$1
+    pkg=$2
+    domainNm=$3
+    fullEntityPath=$4
+
+    cp -f "templates/${tmpl}" ./
+    sed -i "s/#package/${pkg}/" $tmpl
+    sed -i "s/#domainNm/${domainNm}/" $tmpl
+    mv -f $tmpl $fullEntityPath
+
+    echo -e "${fullEntityPath} is created."
 }
 
-
-pkgPath=${path##*/src/main/java/}
-basePackage=${pkgPath//\//\.}
-
-echo "basePackage=$basePackage"
-
-cmdCreatePath=$pkgPath$portPath$applicationPath$domainPath
-cmdPackage=${cmdCreatePath//\//\.}
-
-echo -e "\n"
-
-echo "Creating a Command object.."
-
-cp -f templates/classCommand.tmpl ./
-sed -i "s/#package/${cmdPackage}/" ./classCommand.tmpl
-sed -i "s/#domainNm/${domainNm}/" ./classCommand.tmpl
-mv -f ./classCommand.tmpl "${domainFullPath}/${domainNm}Cmd.java"
-
-echo -e "${domainFullPath}/${domainNm}Cmd.java is created."
-
-showContent "${domainFullPath}/${domainNm}Cmd.java"
-
-if ! $void; then
-    echo -e "\n"
-    echo "Creating a Domain object.."
-
-    cp -f templates/classReturn.tmpl ./
-    sed -i "s/#package/${cmdPackage}/" ./classReturn.tmpl
-    sed -i "s/#domainNm/${domainNm}/" ./classReturn.tmpl
-    mv -f ./classReturn.tmpl "${domainFullPath}/${domainNm}.java"
-
-    echo "${domainFullPath}/${domainNm}.java is created."
-
-    showContent "${domainFullPath}/${domainNm}.java"
-fi
-
-portCreatePath=$pkgPath$portPath
-portPackage=${portCreatePath//\//\.}
-applCreatePath=$portCreatePath$applicationPath
-applPackage=${applCreatePath//\//\.}
-daoCreatePath=$pkgPath$persistPath
-daoPackage=${daoCreatePath//\//\.}
-
-function createEntity(){
+function createInterface(){
     tmpl=$1
     pkg=$2
     domainNm=$3
@@ -163,19 +125,59 @@ function createImpl(){
     echo "${fullEntityPath} is created."
 }
 
+function showContent() {
+    if $showCnt; then
+        
+        echo -e "${GREEN}\n"
+        cat $1
+        echo -e "${NC}"
+    fi    
+}
+
+
+pkgPath=${path##*/src/main/java/}
+basePackage=${pkgPath//\//\.}
+
+echo "basePackage=$basePackage"
+
+cmdCreatePath=$pkgPath$portPath$applicationPath$domainPath
+cmdPackage=${cmdCreatePath//\//\.}
+
+echo -e "\n"
+
+echo "Creating a Command object.."
+
+createEntity classCommand.tmpl ${cmdPackage} ${domainNm} "${domainFullPath}/${domainNm}Cmd.java"
+showContent "${domainFullPath}/${domainNm}Cmd.java"
+
+if ! $void; then
+    echo -e "\n"
+    echo "Creating a Domain object.."
+
+    createEntity classReturn.tmpl ${cmdPackage} ${domainNm} "${domainFullPath}/${domainNm}.java"
+    showContent "${domainFullPath}/${domainNm}.java"
+fi
+
+portCreatePath=$pkgPath$portPath
+portPackage=${portCreatePath//\//\.}
+applCreatePath=$portCreatePath$applicationPath
+applPackage=${applCreatePath//\//\.}
+daoCreatePath=$pkgPath$persistPath
+daoPackage=${daoCreatePath//\//\.}
+
 echo -e "\n"
 
 if $pageable; then
     echo "Creating a PortIn interface that returns Pageable.."
 
-    createEntity pageablePortIn.tmpl ${portPackage} ${domainNm} ${cmdPackage} "${path}${portPath}/${domainNm}PortIn.java"
+    createInterface pageablePortIn.tmpl ${portPackage} ${domainNm} ${cmdPackage} "${path}${portPath}/${domainNm}PortIn.java"
     showContent "${path}${portPath}/${domainNm}PortIn.java"
 
     echo -e "\n"
 
     echo "Creating a PortOut interface that returns Pageable.."
 
-    createEntity pageablePortOut.tmpl ${portPackage} ${domainNm} ${portPackage} "${path}${portPath}/${domainNm}PortOut.java"
+    createInterface pageablePortOut.tmpl ${portPackage} ${domainNm} ${portPackage} "${path}${portPath}/${domainNm}PortOut.java"
     showContent "${path}${portPath}/${domainNm}PortOut.java"
 
     if $implements; then
@@ -195,14 +197,14 @@ if $pageable; then
 elif $list; then    
     echo "Creating a interface that returns List."
 
-    createEntity listPortIn.tmpl ${portPackage} ${domainNm} ${cmdPackage} "${path}${portPath}/${domainNm}PortIn.java"
+    createInterface listPortIn.tmpl ${portPackage} ${domainNm} ${cmdPackage} "${path}${portPath}/${domainNm}PortIn.java"
     showContent "${path}${portPath}/${domainNm}PortIn.java"
 
     echo -e "\n"
 
     echo "Creating a PortOut interface that returns Pageable.."
 
-    createEntity listPortOut.tmpl ${portPackage} ${domainNm} ${cmdPackage} "${path}${portPath}/${domainNm}PortOut.java"
+    createInterface listPortOut.tmpl ${portPackage} ${domainNm} ${cmdPackage} "${path}${portPath}/${domainNm}PortOut.java"
     showContent "${path}${portPath}/${domainNm}PortOut.java"
 
     if $implements; then
@@ -222,14 +224,14 @@ elif $list; then
 elif $void; then    
     echo "Creating a PortIn interface that has no return."
 
-    createEntity voidPortIn.tmpl ${portPackage} ${domainNm} ${cmdPackage} "${path}${portPath}/${domainNm}PortIn.java"
+    createInterface voidPortIn.tmpl ${portPackage} ${domainNm} ${cmdPackage} "${path}${portPath}/${domainNm}PortIn.java"
     showContent "${path}${portPath}/${domainNm}PortIn.java"
 
     echo -e "\n"
 
     echo "Creating a PortOut interface that has no return."
 
-    createEntity voidPortOut.tmpl ${portPackage} ${domainNm} ${cmdPackage} "${path}${portPath}/${domainNm}PortOut.java"
+    createInterface voidPortOut.tmpl ${portPackage} ${domainNm} ${cmdPackage} "${path}${portPath}/${domainNm}PortOut.java"
     showContent "${path}${portPath}/${domainNm}PortOut.java"
 
     if $implements; then
@@ -249,14 +251,14 @@ elif $void; then
 else
     echo "Creating a PortIn interface that returns ${domainNm}."     
 
-    createEntity portIn.tmpl ${portPackage} ${domainNm} ${cmdPackage} "${path}${portPath}/${domainNm}PortIn.java"
+    createInterface portIn.tmpl ${portPackage} ${domainNm} ${cmdPackage} "${path}${portPath}/${domainNm}PortIn.java"
     showContent "${path}${portPath}/${domainNm}PortIn.java"
 
     echo -e "\n"
 
     echo "Creating a PortOut interface that returns ${domainNm}."
 
-    createEntity portOut.tmpl ${portPackage} ${domainNm} ${cmdPackage} "${path}${portPath}/${domainNm}PortOut.java"
+    createInterface portOut.tmpl ${portPackage} ${domainNm} ${cmdPackage} "${path}${portPath}/${domainNm}PortOut.java"
     showContent "${path}${portPath}/${domainNm}PortOut.java"
 
     if $implements; then
