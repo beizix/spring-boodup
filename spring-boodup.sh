@@ -71,11 +71,11 @@ domainFullPath=$path$portPath$applicationPath$domainPath
 
 rm -rf "${path}"
 
-mkdir -p $path$portPath
-mkdir -p $domainFullPath
-mkdir -p $path/adapters
-mkdir -p $path/adapters/web
-mkdir -p $path$persistPath
+mkdir -p "${path}${portPath}"
+mkdir -p "${domainFullPath}"
+mkdir -p "${path}/adapters"
+mkdir -p "${path}/adapters/web"
+mkdir -p "${path}${persistPath}"
 
 function createEntity(){
     tmpl=$1
@@ -84,9 +84,9 @@ function createEntity(){
     fullEntityPath=$4
 
     cp -f "templates/${tmpl}" ./
-    sed -i "s/#package/${pkg}/" $tmpl
-    sed -i "s/#domainNm/${domainNm}/" $tmpl
-    mv -f $tmpl $fullEntityPath
+    sed -i "s/#package/${pkg}/" "${tmpl}"
+    sed -i "s/#domainNm/${domainNm}/" "${tmpl}"
+    mv -f "${tmpl}" "${fullEntityPath}"
 
     echo -e "${fullEntityPath} is created."
 }
@@ -99,10 +99,10 @@ function createInterface(){
     fullEntityPath=$5
 
     cp -f "templates/${tmpl}" ./
-    sed -i "s/#package/${pkg}/g" $tmpl
-    sed -i "s/#domainNm/${domainNm}/g" $tmpl
-    sed -i "s/#cmdPackage/${cmdPkg}/g" $tmpl
-    mv -f $tmpl $fullEntityPath
+    sed -i "s/#package/${pkg}/g" "${tmpl}"
+    sed -i "s/#domainNm/${domainNm}/g" "${tmpl}"
+    sed -i "s/#cmdPackage/${cmdPkg}/g" "${tmpl}"
+    mv -f "${tmpl}" "${fullEntityPath}"
 
     echo "${fullEntityPath} is created."
 }
@@ -116,11 +116,11 @@ function createImpl(){
     fullEntityPath=$6
 
     cp -f "templates/${tmpl}" ./
-    sed -i "s/#package/${pkg}/g" $tmpl
-    sed -i "s/#domainNm/${domainNm}/g" $tmpl
-    sed -i "s/#portPackage/${portPkg}/g" $tmpl
-    sed -i "s/#cmdPackage/${cmdPkg}/g" $tmpl
-    mv -f $tmpl $fullEntityPath
+    sed -i "s/#package/${pkg}/g" "${tmpl}"
+    sed -i "s/#domainNm/${domainNm}/g" "${tmpl}"
+    sed -i "s/#portPackage/${portPkg}/g" "${tmpl}"
+    sed -i "s/#cmdPackage/${cmdPkg}/g" "${tmpl}"
+    mv -f "${tmpl}" "${fullEntityPath}"
 
     echo "${fullEntityPath} is created."
 }
