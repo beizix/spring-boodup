@@ -69,7 +69,7 @@ domainPath="/domain"
 persistPath="/adapters/persistence"
 domainFullPath=$path$portPath$applicationPath$domainPath
 
-rm -rf $path
+rm -rf "${path}"
 
 mkdir -p $path$portPath
 mkdir -p $domainFullPath
@@ -177,20 +177,20 @@ if $pageable; then
 
     echo "Creating a PortOut interface that returns Pageable.."
 
-    createInterface pageablePortOut.tmpl ${portPackage} ${domainNm} ${portPackage} "${path}${portPath}/${domainNm}PortOut.java"
+    createInterface pageablePortOut.tmpl ${portPackage} ${domainNm} ${cmdPackage} "${path}${portPath}/${domainNm}PortOut.java"
     showContent "${path}${portPath}/${domainNm}PortOut.java"
 
     if $implements; then
         echo -e "\n"
         echo "Creating a Service that implements ${domainNm}PortIn.."
 
-        createImpl pageableService.tmpl ${applPackage} ${domainNm} ${portPackage} ${cmdPackage} "${path}${portPath}${applicationPath}/${domainNm}Service.java"
+        createImpl pageableService.tmpl ${applPackage} ${domainNm} ${cmdPackage} ${portPackage} "${path}${portPath}${applicationPath}/${domainNm}Service.java"
         showContent "${path}${portPath}${applicationPath}/${domainNm}Service.java"
 
         echo -e "\n"
         echo "Creating a DAO that implements ${domainNm}PortOut.."
 
-        createImpl pageableDao.tmpl ${daoPackage} ${domainNm} ${portPackage} ${cmdPackage} "${path}${persistPath}/${domainNm}Dao.java"
+        createImpl pageableDao.tmpl ${daoPackage} ${domainNm} ${cmdPackage} ${portPackage} "${path}${persistPath}/${domainNm}Dao.java"
         showContent "${path}${persistPath}/${domainNm}Dao.java"
     fi
 
@@ -211,13 +211,13 @@ elif $list; then
         echo -e "\n"
         echo "Creating a Service that implements ${domainNm}PortIn.."
 
-        createImpl listService.tmpl ${applPackage} ${domainNm} ${portPackage} ${cmdPackage} "${path}${portPath}${applicationPath}/${domainNm}Service.java"
+        createImpl listService.tmpl ${applPackage} ${domainNm} ${cmdPackage} ${portPackage} "${path}${portPath}${applicationPath}/${domainNm}Service.java"
         showContent "${path}${portPath}${applicationPath}/${domainNm}Service.java"
 
         echo -e "\n"
         echo "Creating a DAO that implements ${domainNm}PortOut.."
 
-        createImpl listDao.tmpl ${daoPackage} ${domainNm} ${portPackage} ${cmdPackage} "${path}${persistPath}/${domainNm}Dao.java"
+        createImpl listDao.tmpl ${daoPackage} ${domainNm} ${cmdPackage} ${portPackage} "${path}${persistPath}/${domainNm}Dao.java"
         showContent "${path}${persistPath}/${domainNm}Dao.java"
     fi
 
@@ -238,13 +238,13 @@ elif $void; then
         echo -e "\n"
         echo "Creating a Service that implements ${domainNm}PortIn.."
 
-        createImpl voidService.tmpl ${applPackage} ${domainNm} ${portPackage} ${cmdPackage} "${path}${portPath}${applicationPath}/${domainNm}Service.java"
+        createImpl voidService.tmpl ${applPackage} ${domainNm} ${cmdPackage} ${portPackage} "${path}${portPath}${applicationPath}/${domainNm}Service.java"
         showContent "${path}${portPath}${applicationPath}/${domainNm}Service.java"
 
         echo -e "\n"
         echo "Creating a DAO that implements ${domainNm}PortOut.."
 
-        createImpl voidDao.tmpl ${daoPackage} ${domainNm} ${portPackage} ${cmdPackage} "${path}${persistPath}/${domainNm}Dao.java"
+        createImpl voidDao.tmpl ${daoPackage} ${domainNm} ${cmdPackage} ${portPackage} "${path}${persistPath}/${domainNm}Dao.java"
         showContent "${path}${persistPath}/${domainNm}Dao.java"
     fi
 
@@ -265,13 +265,13 @@ else
         echo -e "\n"
         echo "Creating a Service that implements ${domainNm}PortIn.."
 
-        createImpl service.tmpl ${applPackage} ${domainNm} ${portPackage} ${cmdPackage} "${path}${portPath}${applicationPath}/${domainNm}Service.java"
+        createImpl service.tmpl ${applPackage} ${domainNm} ${cmdPackage} ${portPackage} "${path}${portPath}${applicationPath}/${domainNm}Service.java"
         showContent "${path}${portPath}${applicationPath}/${domainNm}Service.java"
 
         echo -e "\n"
         echo "Creating a DAO that implements ${domainNm}PortOut.."
 
-        createImpl dao.tmpl ${daoPackage} ${domainNm} ${portPackage} ${cmdPackage} "${path}${persistPath}/${domainNm}Dao.java"
+        createImpl dao.tmpl ${daoPackage} ${domainNm} ${cmdPackage} ${portPackage} "${path}${persistPath}/${domainNm}Dao.java"
         showContent "${path}${persistPath}/${domainNm}Dao.java"
     fi
 fi
