@@ -40,12 +40,17 @@ THE SOFTWARE.
 EOF
 
 pageable=false
-showCnt=false
 get=false
 post=false
+put=false
+patch=false
+delete=false
+acceptForm=true
+acceptJson=false
 rest=false
+clear=false
 
-set -- $(getopt -o psgour --long pageable,show,get,post,url,rest -- "$@")
+set -- $(getopt -o pgtadourcfj --long pageable,get,post,put,patch,delete,url,rest,clear,accept-form,accept-json -- "$@")
 for word in "$@"
 do
     case $word in
@@ -56,8 +61,8 @@ done
 for word in "$@"
 do
     case $word in
-       -s | --show) showCnt=true; ;;
        -r | --rest) rest=true; ;;
+       -c | --clear) clear=true; ;;
     esac   
 done
 
@@ -66,6 +71,16 @@ do
     case $word in
        -g | --get) get=true; break ;;
        -o | --post) post=true; break ;;
+       -t | --put) put=true; break ;;
+       -a | --patch) patch=true; break ;;
+       -d | --delete) delete=true; break ;;
+    esac
+done
+
+for word in "$@"
+do
+    case $word in
+       -j | --accept-json) acceptJson=true; acceptForm=false; break ;;
     esac
 done
 
@@ -76,6 +91,7 @@ basePackage=${pkgPath//\//\.}
 
 echo "basePackage=$basePackage"
 echo "url=${url}"
+echo "rest=${rest}"
 
 webPackage=${pkgPath//\//\.}
 
@@ -93,16 +109,16 @@ pageRoot=$(prop 'web.page.root')
 pageExt=$(prop 'web.page.ext')
 # end - read config.properties
 
-rm -rf "${path}"
+if $clear; then
+  rm -rf "${path}"
+fi
 
 mkdir -p "${modelPath}"
 
 function showContent() {
-    if $showCnt; then
-        echo -e "${GREEN}\n"
-        cat $1
-        echo -e "${NC}"
-    fi
+    echo -e "${GREEN}\n"
+    cat $1
+    echo -e "${NC}"
 }
 
 function createEntity(){
@@ -155,6 +171,35 @@ function createGetController() {
   createPage
 }
 
+function createGetRestController() {
+  tmpl=$1
+  pkg=$2
+  domainNm=$3
+  cmdPkg=$4
+  fullEntityPath=$5
+  targetUrl=$6
+  page=${targetUrl/\/}
+
+  echo -e "\n"
+  echo "Creating a rest controller mapped to '${targetUrl}'"
+
+  cp -f "templates/web/${tmpl}" ./
+  sed -i "s/#package/${pkg}/g" "${tmpl}"
+  sed -i "s/#domainNm/${domainNm}/g" "${tmpl}"
+  sed -i "s/#cmdPackage/${cmdPkg}/g" "${tmpl}"
+  sed -i "s@#url@${targetUrl}@g" "${tmpl}"
+  sed -i "s@#page@${page}@g" "${tmpl}"
+
+  if ! $pageable; then
+    sed -i "/Pageable/d" "${tmpl}"
+  fi
+
+  mv -f "${tmpl}" "${fullEntityPath}"
+
+  echo "${fullEntityPath} is created."
+  showContent "${fullEntityPath}"
+}
+
 function createPage(){
   # page template root 경로 얻기
   modulePath=${path%%/src/main/java/*}
@@ -200,14 +245,64 @@ function createPostController() {
   showContent "${fullEntityPath}"
 }
 
+function createPostRestController() {
+  tmpl=$1
+  pkg=$2
+  domainNm=$3
+  cmdPkg=$4
+  fullEntityPath=$5
+  targetUrl=$6
+
+  echo -e "\n"
+  echo "Creating a rest controller mapped to '${targetUrl}'"
+
+  cp -f "templates/web/${tmpl}" ./
+  sed -i "s/#package/${pkg}/g" "${tmpl}"
+  sed -i "s/#domainNm/${domainNm}/g" "${tmpl}"
+  sed -i "s/#cmdPackage/${cmdPkg}/g" "${tmpl}"
+  sed -i "s@#url@${targetUrl}@g" "${tmpl}"
+
+  if $post; then
+    sed -i "/PutMapping/d" "${tmpl}"
+    sed -i "/PatchMapping/d" "${tmpl}"
+    sed -i "/DeleteMapping/d" "${tmpl}"
+  elif $put; then
+    sed -i "/PostMapping/d" "${tmpl}"
+    sed -i "/PatchMapping/d" "${tmpl}"
+    sed -i "/DeleteMapping/d" "${tmpl}"
+  elif $patch; then
+    sed -i "/PostMapping/d" "${tmpl}"
+    sed -i "/PutMapping/d" "${tmpl}"
+    sed -i "/DeleteMapping/d" "${tmpl}"
+  elif $delete; then
+    sed -i "/PostMapping/d" "${tmpl}"
+    sed -i "/PutMapping/d" "${tmpl}"
+    sed -i "/PatchMapping/d" "${tmpl}"
+  fi
+
+  if $acceptForm; then
+    sed -i "s/@RequestBody //g" "${tmpl}"
+    sed -i "/RequestBody/d" "${tmpl}"
+  fi
+
+  mv -f "${tmpl}" "${fullEntityPath}"
+
+  echo "${fullEntityPath} is created."
+  showContent "${fullEntityPath}"
+}
+
 createEntity reqVO.tmpl "${cmdPackage}" "${domainNm}" "${modelPath}/${domainNm}ReqVO.java"
 
 if ! $rest; then
-
     if $get; then
       createGetController getController.tmpl "${webPackage}" "${domainNm}" "${cmdPackage}" "${path}/${domainNm}Controller.java" "${url}"
     elif $post; then
       createPostController postController.tmpl "${webPackage}" "${domainNm}" "${cmdPackage}" "${path}/${domainNm}Controller.java" "${url}"
     fi
-
+else
+  if $get; then
+    createGetRestController getRestController.tmpl "${webPackage}" "${domainNm}" "${cmdPackage}" "${path}/${domainNm}Controller.java" "${url}"
+  elif $post || $put || $patch || $delete; then
+    createPostRestController postRestController.tmpl "${webPackage}" "${domainNm}" "${cmdPackage}" "${path}/${domainNm}Controller.java" "${url}"
+  fi
 fi
