@@ -24,7 +24,7 @@ class #domainNmController {
   ResponseEntity<?> operate(@Valid @RequestBody #domainNmReqVO reqVO, BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-        .body(bindingResult);
+        .body(bindingResult.getFieldErrors());
     }
 
     return ResponseEntity.status(HttpStatus.OK)
