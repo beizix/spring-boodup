@@ -49,8 +49,9 @@ acceptForm=true
 acceptJson=false
 rest=false
 clear=false
+jakartaPkg='jakarta'
 
-set -- $(getopt -o pgtadourcfj --long pageable,get,post,put,patch,delete,url,rest,clear,accept-form,accept-json -- "$@")
+set -- $(getopt -o pgtadourcfjb --long pageable,get,post,put,patch,delete,url,rest,clear,accept-form,accept-json,below_17 -- "$@")
 for word in "$@"
 do
     case $word in
@@ -63,6 +64,7 @@ do
     case $word in
        -r | --rest) rest=true; ;;
        -c | --clear) clear=true; ;;
+       -b | --below_17) jakartaPkg='javax'; ;; 
     esac   
 done
 
@@ -238,6 +240,7 @@ function createPostController() {
   sed -i "s/#domainNm/${domainNm}/g" "${tmpl}"
   sed -i "s/#cmdPackage/${cmdPkg}/g" "${tmpl}"
   sed -i "s@#url@${targetUrl}@g" "${tmpl}"
+  sed -i "s/#jakartaPkg/${jakartaPkg}/g" "${tmpl}"
 
   mv -f "${tmpl}" "${fullEntityPath}"
 
@@ -261,6 +264,7 @@ function createPostRestController() {
   sed -i "s/#domainNm/${domainNm}/g" "${tmpl}"
   sed -i "s/#cmdPackage/${cmdPkg}/g" "${tmpl}"
   sed -i "s@#url@${targetUrl}@g" "${tmpl}"
+  sed -i "s/#jakartaPkg/${jakartaPkg}/g" "${tmpl}"
 
   if $post; then
     sed -i "/PutMapping/d" "${tmpl}"
